@@ -63,6 +63,7 @@ public class Grid : MonoBehaviour
             {
                 grid[i, j] = new Cell(new Vector2Int(j, i), cellTexts[i * GRID_SIZE + j]);
 
+                // Set edge's neighbors to false
                 if (i == 0)
                     grid[i, j].neighbors.up = false;
                 if (i == GRID_SIZE - 1)

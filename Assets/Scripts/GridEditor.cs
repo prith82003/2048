@@ -1,10 +1,11 @@
+#if UNITY_EDITOR
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(Grid))]
 
 // Modifies the inspector for the Grid class
 // Adds a button to reset the high score
+[CustomEditor(typeof(Grid))]
 public class GridEditor : Editor
 {
     public override void OnInspectorGUI()
@@ -18,3 +19,4 @@ public class GridEditor : Editor
         }
     }
 }
+#endif

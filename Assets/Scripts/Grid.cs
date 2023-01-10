@@ -32,10 +32,12 @@ public class Grid : MonoBehaviour
     // Game Vars
     static int movesMade = 0;
     enum direction { left, up, right, down };
+    static bool isPaused;
 
     // Game Over
     bool gameOver = false;
     public GameObject GameOverScreen;
+    public GameObject pauseMenu;
 
     void Start() => RestartGame();
 
@@ -45,6 +47,7 @@ public class Grid : MonoBehaviour
     public void RestartGame()
     {
         // Reset Variables
+        isPaused = false;
         movesMade = 0;
         gameOver = false;
         score = 0;
@@ -63,6 +66,7 @@ public class Grid : MonoBehaviour
             {
                 grid[i, j] = new Cell(new Vector2Int(j, i), cellTexts[i * GRID_SIZE + j]);
 
+                // Set edge's neighbors to false
                 if (i == 0)
                     grid[i, j].neighbors.up = false;
                 if (i == GRID_SIZE - 1)
@@ -351,6 +355,20 @@ public class Grid : MonoBehaviour
     /// </summary>
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Escape))
+            isPaused = !isPaused;
+
+        if (isPaused)
+        {
+            pauseMenu.SetActive(true);
+            return;
+        }
+        else
+        {
+            pauseMenu.SetActive(false);
+        }
+
+
         // If Game over, reveal screen skip rest of game loop
         if (gameOver)
         {
@@ -449,6 +467,8 @@ public class Grid : MonoBehaviour
                 CreateNum();
         }
     }
+
+    public static void Quit() => Application.Quit();
 
     // Just for me, Resets high score to 0 before build
     public void ResetHighScore() => HighScoreIO.SaveHighScore(0);

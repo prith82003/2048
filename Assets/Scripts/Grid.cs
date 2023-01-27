@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum direction { left, up, right, down };
+
 public class Grid : MonoBehaviour
 {
     // Text Fields
@@ -22,7 +24,6 @@ public class Grid : MonoBehaviour
     public System.Action BeforeMove;
 
     // Constants
-    public const float COL_CHANGE_FAC = 125f;
     public const int GRID_SIZE = 4;
 
     // Debug
@@ -31,7 +32,6 @@ public class Grid : MonoBehaviour
 
     // Game Vars
     static int movesMade = 0;
-    enum direction { left, up, right, down };
     static bool isPaused;
 
     // Game Over
@@ -39,7 +39,11 @@ public class Grid : MonoBehaviour
     public GameObject GameOverScreen;
     public GameObject pauseMenu;
 
-    void Start() => RestartGame();
+    void Start()
+    {
+        RestartGame();
+        TouchControls.OnSwipe += Move;
+    }
 
     /// <summary>
     /// Resets all variables and Grid
@@ -399,78 +403,92 @@ public class Grid : MonoBehaviour
         // Order also determines which cells are combined first (when moving up, topmost cell should combine first)
 
         if (Input.GetKeyDown(KeyCode.UpArrow))
-        {
-            // Reset combined bools
-            BeforeMove();
-            Debug.Log("Up");
-            // loop through grid from top left and push cell up if up neighbor is true
-            for (int i = 0; i < GRID_SIZE; i++)
-            {
-                for (int j = 0; j < GRID_SIZE; j++)
-                {
-                    CheckCell(i, j, -1, 0, direction.up);
-                }
-            }
-
-            // Only creates new number if cells have been moved or combined in this turn
-            if (movesMade > 0)
-                CreateNum();
-        }
+            Move(direction.up);
         else if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            BeforeMove();
-            Debug.Log("Down");
-            // loop through grid from bottom left and push cell down if down neighbor is true
-            for (int i = 3; i >= 0; i--)
-            {
-                for (int j = 0; j < 4; j++)
-                {
-                    CheckCell(i, j, 1, 0, direction.down);
-                }
-            }
-
-            if (movesMade > 0)
-                CreateNum();
-        }
+            Move(direction.down);
         else if (Input.GetKeyDown(KeyCode.LeftArrow))
-        {
-            BeforeMove();
-            Debug.Log("Left");
-
-            // loop through grid from top left and push cell left if left neighbor is true
-            for (int i = 0; i < 4; i++)
-            {
-                for (int j = 0; j < 4; j++)
-                {
-                    CheckCell(i, j, 0, -1, direction.left);
-                }
-            }
-
-            if (movesMade > 0)
-                CreateNum();
-        }
+            Move(direction.left);
         else if (Input.GetKeyDown(KeyCode.RightArrow))
+            Move(direction.right);
+    }
+
+    void Move(direction dir)
+    {
+        int i0 = 0;
+        int j0 = 0;
+        int iLim = 0;
+        int jLim = 0;
+        int iD = 0;
+        int jD = 0;
+        int dirUp = 0;
+        int dirLeft = 0;
+
+        switch (dir)
         {
-            BeforeMove();
-            Debug.Log("Right");
-
-            // loop through grid from top right and push cell right if right neighbor is true
-            for (int i = 0; i < 4; i++)
-            {
-                for (int j = 3; j >= 0; j--)
-                {
-                    CheckCell(i, j, 0, 1, direction.right);
-                }
-            }
-
-            if (movesMade > 0)
-                CreateNum();
+            case direction.up:
+                i0 = 0;
+                j0 = 0;
+                iLim = GRID_SIZE;
+                jLim = GRID_SIZE;
+                iD = 1;
+                jD = 1;
+                dirUp = -1;
+                break;
+            case direction.down:
+                i0 = GRID_SIZE - 1;
+                j0 = 0;
+                iLim = -1;
+                jLim = GRID_SIZE;
+                iD = -1;
+                jD = 1;
+                dirUp = 1;
+                break;
+            case direction.left:
+                i0 = 0;
+                j0 = 0;
+                iLim = GRID_SIZE;
+                jLim = GRID_SIZE;
+                iD = 1;
+                jD = 1;
+                dirLeft = -1;
+                break;
+            case direction.right:
+                i0 = 0;
+                j0 = GRID_SIZE - 1;
+                iLim = GRID_SIZE;
+                jLim = -1;
+                iD = 1;
+                jD = -1;
+                dirLeft = 1;
+                break;
         }
+
+        // Reset combined bools
+        BeforeMove();
+        // loop through grid from top left and push cell up if up neighbor is true
+
+        int i = i0;
+        while (i != iLim)
+        {
+            int j = j0;
+            while (j != jLim)
+            {
+                CheckCell(i, j, dirUp, dirLeft, dir);
+                j += jD;
+            }
+            i += iD;
+        }
+
+        // Only creates new number if cells have been moved or combined in this turn
+        if (movesMade > 0)
+            CreateNum();
     }
 
     public static void Quit() => Application.Quit();
 
     // Just for me, Resets high score to 0 before build
     public void ResetHighScore() => HighScoreIO.SaveHighScore(0);
+
+    public static void PauseGame() => isPaused = !isPaused;
 }
 

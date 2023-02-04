@@ -20,3 +20,6 @@ Controls the reading and writing of the file to save the high score
 DebugCell.cs
 Controls all the debugging for the cells
 Many errors were encountered
+
+Game Download: 
+https://spicycurry.itch.io/2048 
